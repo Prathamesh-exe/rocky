@@ -5,22 +5,23 @@ name = "rocky"
 platforms = ["linux-64", "win-64"]
 version = "0.1.0"
 
+# Linux uses LLVM Clang
 [target.linux-64.tasks]
 configure = "cmake -S . -B build -G \"Unix Makefiles\" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_C_COMPILER=$CONDA_PREFIX/bin/clang -DCMAKE_CXX_COMPILER=$CONDA_PREFIX/bin/clang++-22"
+run = { cmd = "./build/rocky", depends-on = ["compile"] }
 
+# Windows uses GCC via MinGW-w64 to compile
 # Lots of command prompt/powershell tomfoolery needed to get
 # machine-independent paths working by expanding CONDA_PREFIX env variable
 [target.win-64.tasks]
 # disable dia sdk
 patch-llvm = "cmd /C \"powershell -NoProfile -Command \\\"$f = $env:CONDA_PREFIX + '/Library/lib/cmake/llvm/LLVMExports.cmake'; (Get-Content $f) -replace '\\$ENV\\{VSINSTALLDIR\\}/DIA SDK/lib/amd64/diaguids\\.lib;', '' | Set-Content $f\\\"\""
 configure = { cmd = "cmd /C cmake -S . -B build -G \"MinGW Makefiles\" -DCMAKE_C_COMPILER=\"%CONDA_PREFIX%/Library/mingw-w64/bin/gcc.exe\" -DCMAKE_CXX_COMPILER=\"%CONDA_PREFIX%/Library/mingw-w64/bin/g++.exe\" -DCMAKE_MAKE_PROGRAM=\"%CONDA_PREFIX%/Library/mingw-w64/bin/mingw32-make.exe\"", depends-on = ["patch-llvm"] }
+run = { cmd = "./build/rocky.exe", depends-on = ["compile"] }
 
-
-
-
+# Common to both OSes
 [tasks]
 compile = { cmd = "cmake --build build", depends-on = ["configure"] }
-run = { cmd = "./build/rocky.exe", depends-on = ["compile"] }
 clean = "rm -rf build"
 
 [dependencies]
