@@ -4,6 +4,7 @@
 #include <llvm-c/TargetMachine.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <rocky/main.h>
 
 int main() {
     LLVMInitializeNativeTarget();
@@ -40,7 +41,7 @@ int main() {
     }
 
     LLVMTargetMachineRef tm = LLVMCreateTargetMachine(target, triple, "generic", "", LLVMCodeGenLevelDefault, LLVMRelocDefault, LLVMCodeModelDefault);
-    
+
     LLVMMemoryBufferRef buffer;
     if (LLVMTargetMachineEmitToMemoryBuffer(tm, module, LLVMAssemblyFile, &error, &buffer)) {
         fprintf(stderr, "Failed to emit assembly: %s\n", error);
@@ -55,6 +56,8 @@ int main() {
     LLVMDisposeMessage(triple);
     LLVMDisposeBuilder(builder);
     LLVMDisposeModule(module);
+
+    hello_world();
 
     return 0;
 }
